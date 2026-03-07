@@ -2,6 +2,7 @@ import socket
 import threading
 import sys
 import curses
+import time
 from datetime import datetime
 
 # Usage: python client.py [host] [port]
@@ -10,7 +11,7 @@ HOST_IPV6 = sys.argv[1] if len(sys.argv) > 1 else '::1'
 PORT = int(sys.argv[2]) if len(sys.argv) > 2 else 5555
 
 
-def chat_ui(stdscr, client, username):
+def chat_ui(stdscr, sock_ref, username):
     curses.curs_set(1)
     stdscr.clear()
     stdscr.refresh()
@@ -51,18 +52,38 @@ def chat_ui(stdscr, client, username):
             msg_win.refresh()
             redraw_input()  # restore cursor to input window
 
+    def reconnect():
+        delay = 1
+        for attempt in range(1, 11):
+            add_message(f'[{attempt}/10] Reconnecting in {delay}s...')
+            time.sleep(delay)
+            new_sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            try:
+                new_sock.connect((HOST_IPV6, PORT))
+                new_sock.recv(1024)  # consume "Enter your username: "
+                new_sock.send(username.encode('utf-8'))
+                sock_ref[0] = new_sock
+                return True
+            except Exception:
+                new_sock.close()
+                delay = min(delay * 2, 30)
+        return False
+
     def receive():
         while True:
             try:
-                msg = client.recv(1024).decode('utf-8')
+                msg = sock_ref[0].recv(1024).decode('utf-8')
                 if msg:
                     add_message(msg)
                 else:
-                    add_message('\nDisconnected from server.')
-                    break
+                    raise ConnectionError('empty recv')
             except:
-                add_message('\nConnection closed.')
-                break
+                add_message('\nServer disconnected.')
+                if reconnect():
+                    add_message('\nReconnected!')
+                else:
+                    add_message('\nCould not reconnect. Press QUIT to exit.')
+                    break
 
     threading.Thread(target=receive, daemon=True).start()
 
@@ -80,7 +101,7 @@ def chat_ui(stdscr, client, username):
                 if msg.strip().upper() == 'QUIT':
                     break
                 if msg.strip():
-                    client.send(msg.encode('utf-8'))
+                    sock_ref[0].send(msg.encode('utf-8'))
                     ts = datetime.now().strftime("[%H:%M:%S]")
                     msg_win.addstr(f"{ts} [{username}]: {msg}\n")
                     msg_win.refresh()
@@ -112,7 +133,7 @@ try:
     username = input(server_prompt).strip() or 'UnknownUser'
     client_sock.send(username.encode('utf-8'))
 
-    curses.wrapper(lambda stdscr: chat_ui(stdscr, client_sock, username))
+    curses.wrapper(lambda stdscr: chat_ui(stdscr, [client_sock], username))
 
 except Exception as e:
     print(f'Could not connect: {e}')
