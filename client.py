@@ -2,10 +2,10 @@ import socket
 import threading
 import sys
 
-# The host's public IPv6 address goes here. 
-# (Use '::1' if you are testing this on the same computer as the server)
-HOST_IPV6 = '::1' 
-PORT = 5555
+# Usage: python client.py [host] [port]
+# Defaults to ::1 (localhost) on port 5555
+HOST_IPV6 = sys.argv[1] if len(sys.argv) > 1 else '::1'
+PORT = int(sys.argv[2]) if len(sys.argv) > 2 else 5555
 
 def receive_messages(sock):
     while True:

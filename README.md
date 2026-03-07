@@ -11,33 +11,7 @@ A minimal, multi-user chat room using raw TCP over IPv6, written in Python with 
 
 ## Requirements
 
-- Python 3.6+
 - An IPv6-capable network interface (or use `::1` for localhost testing)
-
-## Usage
-
-### Start the server
-
-```bash
-python server.py
-```
-
-Listens on `::` (all IPv6 interfaces), port `5555`.
-
-### Connect a client
-
-Edit `HOST_IPV6` in `client.py` to point at the server's IPv6 address (default `::1` for localhost), then:
-
-```bash
-python client.py
-```
-
-- Type a message and press **Enter** to send.
-- Type `QUIT` to disconnect.
-
-### Testing locally
-
-Run the server and one or more clients in separate terminals, all using `HOST_IPV6 = '::1'`.
 
 ## Project Structure
 

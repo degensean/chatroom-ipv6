@@ -3,6 +3,8 @@ import threading
 import sys
 from datetime import datetime
 
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 5555
+
 # We will use a dictionary to keep track of clients and their usernames
 clients = {}
 
@@ -67,11 +69,11 @@ def handle_client(client):
 
 server = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server.bind(('::', 5555))
+server.bind(('::', PORT))
 server.listen()
 server.settimeout(1.0)
 
-print("IPv6 Chat Server running on port 5555. Press Ctrl+C to stop.")
+print(f"IPv6 Chat Server running on port {PORT}. Press Ctrl+C to stop.")
 
 try:
     while True:
