@@ -46,7 +46,10 @@ def handle_client(client):
                 break
             
             decoded_text = message.decode('utf-8').strip()
-            if decoded_text:
+            if decoded_text == '/users':
+                user_list = ', '.join(clients.values())
+                client.send(f"{ts()} Online: {user_list}\n".encode('utf-8'))
+            elif decoded_text:
                 formatted_message = f"{ts()} [{username}]: {decoded_text}\n"
                 broadcast(formatted_message.encode('utf-8'), client)
                 
