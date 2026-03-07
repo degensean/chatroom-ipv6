@@ -33,11 +33,17 @@ def handle_client(client):
         # Give them a default name if they just hit Enter
         if not username:
             username = "UnknownUser"
-            
+
+        # Reject duplicate usernames
+        if username in clients.values():
+            client.send(f"Username '{username}' is already taken. Disconnecting.\n".encode('utf-8'))
+            client.close()
+            return
+
         clients[client] = username
-        
+
         # 2. Announce to everyone that they joined
-        welcome_msg = f"\n{ts()} *** {username} has joined the chat! ***\n"
+        welcome_msg = f"\n{ts()} *** [{username}] has joined the chat! ***\n"
         print(welcome_msg.strip()) # Print to the server console too
         broadcast(welcome_msg.encode('utf-8'), client)
         
