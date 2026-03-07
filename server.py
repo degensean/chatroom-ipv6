@@ -1,9 +1,14 @@
 import socket
 import threading
 import sys
+from datetime import datetime
 
 # We will use a dictionary to keep track of clients and their usernames
-clients = {} 
+clients = {}
+
+def ts():
+    """Return current time as [HH:MM:SS]."""
+    return datetime.now().strftime("[%H:%M:%S]")
 
 def broadcast(message, sender=None):
     """Sends a message to everyone except the sender."""
@@ -30,7 +35,7 @@ def handle_client(client):
         clients[client] = username
         
         # 2. Announce to everyone that they joined
-        welcome_msg = f"\n*** {username} has joined the chat! ***\n"
+        welcome_msg = f"\n{ts()} *** {username} has joined the chat! ***\n"
         print(welcome_msg.strip()) # Print to the server console too
         broadcast(welcome_msg.encode('utf-8'), client)
         
@@ -42,7 +47,7 @@ def handle_client(client):
             
             decoded_text = message.decode('utf-8').strip()
             if decoded_text:
-                formatted_message = f"[{username}]: {decoded_text}\n"
+                formatted_message = f"{ts()} [{username}]: {decoded_text}\n"
                 broadcast(formatted_message.encode('utf-8'), client)
                 
     except:
@@ -52,7 +57,7 @@ def handle_client(client):
         if client in clients:
             user = clients[client]
             del clients[client]
-            leave_msg = f"\n*** {user} has left the chat. ***\n"
+            leave_msg = f"\n{ts()} *** {user} has left the chat. ***\n"
             print(leave_msg.strip())
             broadcast(leave_msg.encode('utf-8'))
         client.close()
