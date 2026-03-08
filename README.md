@@ -21,19 +21,22 @@ chatroom-ipv6/
 └── client.py   # Interactive CLI chat client
 ```
 
-## Potential Features to Add
+## Features Checklist
 
-| Feature | Description |
-|---|---|
-| **Timestamps** | Prefix messages with `[HH:MM:SS]` |
-| **`/users` command** | List who is currently online |
-| **Private messages** | `/msg <user> <text>` for DMs |
-| **Unique usernames** | Reject duplicate names on join |
-| **Chat rooms/channels** | `/join <room>` to switch rooms |
-| **Scrolling TUI** | `curses`-based UI so your input line doesn't mix with incoming messages |
-| **Message history** | Replay the last N messages to new joiners |
-| **Server log file** | Persist all messages to a dated `.log` file |
-| **TLS encryption** | Wrap sockets with `ssl` for encrypted transport |
-| **Dual-stack (IPv4+IPv6)** | Accept both address families |
-| **Config file** | `config.ini` for port, max connections, etc. |
-| **Admin commands** | `/kick <user>`, `/ban <ip>` for the server operator |
+### Implemented
+- [x] **Timestamps** — Prefix messages with `[HH:MM:SS]`
+- [x] **`/users` command** — List who is currently online
+- [x] **Unique usernames** — Reject duplicate names on join
+- [x] **Scrolling TUI** — `curses`-based UI so your input line doesn't mix with incoming messages
+- [x] **Sound notifications** — Terminal bell on new messages, with `/mute` and `/unmute` commands
+- [x] **Client auto-reconnect** — Automatically reconnect to server if it restarts
+
+### Not Yet Implemented
+- [ ] **Private messages** — `/msg <user> <text>` for DMs
+- [ ] **Chat rooms/channels** — `/join <room>` to switch rooms
+- [ ] **Message history** — Replay the last N messages to new joiners
+- [ ] **Server log file** — Persist all messages to a dated `.log` file
+- [ ] **TLS encryption** — Wrap sockets with `ssl` for encrypted transport
+- [ ] **Dual-stack (IPv4+IPv6)** — Accept both address families
+- [ ] **Config file** — `config.ini` for port, max connections, etc.
+- [ ] **Admin commands** — `/kick <user>`, `/ban <ip>` for the server operator
