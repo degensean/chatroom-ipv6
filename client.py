@@ -27,14 +27,20 @@ def chat_ui(stdscr, sock_ref, username):
 
     msg_win.scrollok(True)
 
-    status = f' {username}  |  /users  |  QUIT to exit '
     sep_win.bkgd(' ', curses.A_REVERSE)
-    sep_win.addstr(0, 0, status[:width - 1])
-    sep_win.refresh()
 
     lock = threading.Lock()
     prompt = f'[{username}]> '
     buf = []
+    muted = [False]
+
+    def redraw_status():
+        """Redraw the status bar (must be called with lock held)."""
+        mute_label = ' [MUTED]' if muted[0] else ''
+        status = f' {username}{mute_label}  |  /users  /mute  /unmute  |  QUIT to exit '
+        sep_win.clear()
+        sep_win.addstr(0, 0, status[:width - 1])
+        sep_win.refresh()
 
     def redraw_input():
         """Redraw the input line (must be called with lock held)."""
@@ -44,12 +50,14 @@ def chat_ui(stdscr, sock_ref, username):
         inp_win.move(0, min(len(prompt) + len(buf), width - 1))
         inp_win.refresh()
 
-    def add_message(msg):
+    def add_message(msg, beep=False):
         with lock:
             for line in msg.splitlines():
                 if line:
                     msg_win.addstr(line + '\n')
             msg_win.refresh()
+            if beep and not muted[0]:
+                curses.beep()
             redraw_input()  # restore cursor to input window
 
     def reconnect():
@@ -74,7 +82,7 @@ def chat_ui(stdscr, sock_ref, username):
             try:
                 msg = sock_ref[0].recv(1024).decode('utf-8')
                 if msg:
-                    add_message(msg)
+                    add_message(msg, beep=True)
                 else:
                     raise ConnectionError('empty recv')
             except:
@@ -89,6 +97,7 @@ def chat_ui(stdscr, sock_ref, username):
 
     inp_win.keypad(True)
     with lock:
+        redraw_status()
         redraw_input()
 
     while True:
@@ -98,9 +107,20 @@ def chat_ui(stdscr, sock_ref, username):
             with lock:
                 msg = ''.join(buf)
                 buf.clear()
+                cmd = msg.strip().lower()
                 if msg.strip().upper() == 'QUIT':
                     break
-                if msg.strip():
+                elif cmd == '/mute':
+                    muted[0] = True
+                    redraw_status()
+                    msg_win.addstr('[Sound muted]\n')
+                    msg_win.refresh()
+                elif cmd == '/unmute':
+                    muted[0] = False
+                    redraw_status()
+                    msg_win.addstr('[Sound unmuted]\n')
+                    msg_win.refresh()
+                elif msg.strip():
                     sock_ref[0].send(msg.encode('utf-8'))
                     ts = datetime.now().strftime("[%H:%M:%S]")
                     msg_win.addstr(f"{ts} [{username}]: {msg}\n")
