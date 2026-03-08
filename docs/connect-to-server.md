@@ -14,7 +14,7 @@ Windows does not have `nc` by default. It is recommended to use the `client.py` 
 python client.py <server_ipv6> <port>
 ```
 
-### Method 1 (very basic, works on Linux/Mac)
+### Method 2 (very basic, works on Linux/Mac)
 
 ```bash
 sudo apt update && sudo apt install netcat-openbsd -y # Linux
